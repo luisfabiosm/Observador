@@ -32,38 +32,28 @@ namespace Infra.Registers
 
             #region RabbitMQ
 
+            services.Configure<RabbitMQSettings>(options => configuration.GetSection("Broker").Bind(options));
+
             services.AddSingleton<IRabbitMQConnection>(sp =>
             {
                 var logger = sp.GetRequiredService<ILogger<RabbitMQConnection>>();
 
-                RabbitMQSettings credentials = new()
-                {
-                    Host = configuration.GetSection("EventBusSettings")["Hostname"],
-                    Port = int.Parse(configuration.GetSection("EventBusSettings")["Port"] ?? "5672"),
-                    Username = configuration.GetSection("EventBusSettings")["Username"],
-                    Password = configuration.GetSection("EventBusSettings")["Password"],
-                    Queue = configuration.GetSection("RabbitMQ")["Queue"],
-                    Exchange = configuration.GetSection("RabbitMQ")["Exchange"],
-                    Retry = int.Parse(configuration.GetSection("RabbitMQ")["Retry"]),
-                    Delay = int.Parse(configuration.GetSection("RabbitMQ")["Delay"]),
-                    ConnectionTimeout = int.Parse(configuration.GetSection("EventBusSettings")["ConnectionTimeout"]),
-                    MessageLimit = int.Parse(configuration.GetSection("RabbitMQ")["MessageLimit"]),
-                };
-
-
+                var settings = new RabbitMQSettings();
+                configuration.GetSection("Broker").Bind(settings);
+   
                 ConnectionFactory factory = new()
                 {
-                    HostName = credentials.Host,
-                    Port = credentials.Port,
-                    UserName = credentials.Username,
-                    Password = credentials.Password,
-                    RequestedConnectionTimeout = TimeSpan.FromMilliseconds(Convert.ToDouble(credentials.ConnectionTimeout))
+                    HostName = settings.Host,
+                    Port = settings.Port,
+                    UserName = settings.Username,
+                    Password = settings.Password,
+                    RequestedConnectionTimeout = TimeSpan.FromMilliseconds(Convert.ToDouble(settings.ConnectionTimeout))
                 };
 
-                return new RabbitMQConnection(factory, credentials, logger);
+                return new RabbitMQConnection(factory, settings, logger);
             });
 
-            services.AddScoped<IBrokerPublishService, BrokerPublishService>();
+            services.AddSingleton<IBrokerPublishService, BrokerPublishService>();
 
             #endregion
 

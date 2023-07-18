@@ -24,7 +24,6 @@ namespace Adapters.Broker.Services
             _connection = _rabbitConnection.Connection;
             _channel = _rabbitConnection.CreateModel();
             _settings = _rabbitConnection.RabbitSettings;
-
         }
 
         public void Publish<T>(T @object, string Queue = null, string Exchange = null, string RoutingKey = null)
@@ -41,7 +40,7 @@ namespace Adapters.Broker.Services
                     exclusive: false,
                     autoDelete: false);
 
-                _channel.QueueBind(Queue ?? _settings.Queue, Exchange ?? _settings.Exchange, RoutingKey ?? "directexchange_key");
+                _channel.QueueBind(Queue, Exchange ?? _settings.Exchange, RoutingKey ?? "directexchange_key");
 
                 IBasicProperties properties = _channel.CreateBasicProperties();
                 byte[] messageBytes = Encoding.UTF8.GetBytes(System.Text.Json.JsonSerializer.Serialize(@object));

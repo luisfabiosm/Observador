@@ -6,7 +6,7 @@ namespace Domain.Core.Models.SPA
     {
         public string? Id { get; set; }
         public DateTime? DataInterface { get; set; }
-        public int? Dependencia { get; set; }
+        public string? Dependencia { get; set; }
         public bool? Liberado  { get; set; }
 
         ~InterfaceArquivo()
